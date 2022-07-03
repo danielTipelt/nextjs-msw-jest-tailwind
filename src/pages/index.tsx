@@ -2,46 +2,36 @@ import type { NextPage } from "next";
 import { useState } from "react";
 import { Layout } from "../components/Layout";
 
-const Home: NextPage = ({ book }) => {
-  const [reviews, setReviews] = useState(null);
+const HomePage: NextPage<{ name: string }> = (props) => {
+  const [name, setName] = useState(props.name);
 
-  const handleGetReviews = () => {
+  const handleGetReviews = async () => {
     // Client-side request are mocked by `mocks/browser.js`.
-    fetch("/reviews")
-      .then((res) => res.json())
-      .then(setReviews);
+    const res = await fetch("/name");
+    const data = await res.json();
+    setName(data);
   };
 
   return (
-    <div>
-      <button onClick={handleGetReviews}>Load reviews</button>
-      <img src={book.imageUrl} alt={book.title} width="250" />
-      <h1>{book.title}</h1>
-      <p>{book.description}</p>
-      {reviews && (
-        <ul>
-          {reviews.map((review) => (
-            <li key={review.id}>
-              <p>{review.text}</p>
-              <p>{review.author}</p>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <Layout>
+      <h1>{name}</h1>
+      <button type="button" onClick={handleGetReviews}>
+        Fetch
+      </button>
+    </Layout>
   );
 };
 
-export default Home;
+export default HomePage;
 
 export async function getServerSideProps() {
   // Server-side requests are mocked by `mocks/server.js`.
-  const res = await fetch("https://my.backend/book");
-  const book = await res.json();
+  const res = await fetch("https://my.backend/name");
+  const name = await res.json();
 
   return {
     props: {
-      book,
+      name: name,
     },
   };
 }
